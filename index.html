@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Formatter</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #f5f7fa;
+            --accent-color: #6b8cae;
+            --text-color: #333;
+            --border-color: #dde1e7;
+            --ad-bg-color: #f5f7fa;
+            --ad-border-color: #dde1e7;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #f9f9f9;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        
+        .container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .input-section, .output-section {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 15px;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 111, 165, 0.2);
+        }
+        
+        .controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px 18px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        button:hover {
+            background-color: var(--accent-color);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .output {
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            background-color: var(--secondary-color);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 15px;
+        }
+        
+        /* Ad styles */
+        .ad-banner {
+            background-color: var(--ad-bg-color);
+            padding: 18px;
+            text-align: center;
+            margin-bottom: 30px;
+            border: 1px solid var(--ad-border-color);
+            border-radius: 8px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        
+        .ad-sidebar {
+            background-color: var(--ad-bg-color);
+            padding: 15px;
+            text-align: center;
+            border: 1px solid var(--ad-border-color);
+            border-radius: 8px;
+            width: 180px;
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #777;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        
+        .ad-footer {
+            background-color: var(--ad-bg-color);
+            padding: 18px;
+            text-align: center;
+            margin-top: 30px;
+            border: 1px solid var(--ad-border-color);
+            border-radius: 8px;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        }
+        
+        .page-wrapper {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .page-wrapper {
+                flex-direction: column;
+            }
+            
+            .ad-sidebar {
+                width: auto;
+                min-height: 250px;
+                margin-top: 30px;
+            }
+            
+            .container {
+                flex-direction: column;
+            }
+        }
+        
+        /* Toast notification styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4caf50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <h1>List Formatter</h1>
+    
+    <!-- Top Banner Ad -->
+    <div class="ad-banner">
+        <p>Advertisement Banner (728×90)</p>
+    </div>
+    
+    <div class="page-wrapper">
+        <div class="main-content">
+            <div class="container">
+                <div class="input-section">
+                    <h2>Input</h2>
+                    <p>Enter your list (one item per line):</p>
+                    <textarea id="inputList" placeholder="1
+2
+3"></textarea>
+                    <div class="controls">
+                        <button onclick="formatList('comma')">Format with Commas</button>
+                        <button onclick="formatList('quotes')">Format with Quotes</button>
+                        <button onclick="removeDuplicates()">Remove Duplicates</button>
+                    </div>
+                </div>
+                <div class="output-section">
+                    <h2>Output</h2>
+                    <button onclick="copyToClipboard()" style="margin-bottom: 15px;">Copy to Clipboard</button>
+                    <div class="output" id="outputText"></div>
+                </div>
+            </div>
+            
+            <!-- Footer Ad -->
+            <div class="ad-footer">
+                <p>Advertisement Banner (728×90)</p>
+            </div>
+        </div>
+        
+        <!-- Sidebar Ad -->
+        <div class="ad-sidebar">
+            <p>Advertisement</p>
+            <p>Sidebar (160×600)</p>
+        </div>
+    </div>
+
+    <script>
+        function formatList(type) {
+            // Get the input text
+            const input = document.getElementById('inputList').value;
+            
+            // Split the input by newline and filter out empty lines
+            const items = input.split('\n').filter(item => item.trim() !== '');
+            
+            let formattedOutput = '';
+            
+            if (type === 'comma') {
+                // Format with commas only
+                formattedOutput = items.join(', ');
+            } else if (type === 'quotes') {
+                // Format with single quotes and commas
+                formattedOutput = items.map(item => `'${item}'`).join(', ');
+            }
+            
+            // Display the output
+            document.getElementById('outputText').textContent = formattedOutput;
+        }
+        
+        function copyToClipboard() {
+            const outputText = document.getElementById('outputText').textContent;
+            
+            if (outputText) {
+                navigator.clipboard.writeText(outputText)
+                    .then(() => {
+                        showToast('Copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        showToast('Failed to copy to clipboard', true);
+                    });
+            }
+        }
+        
+        function showToast(message, isError = false) {
+            // Remove any existing toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            
+            if (isError) {
+                toast.style.backgroundColor = '#f44336';
+            }
+            
+            document.body.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            // Hide and remove toast after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+        
+        function removeDuplicates() {
+            // Get the input text
+            const input = document.getElementById('inputList').value;
+            
+            // Split the input by newline and filter out empty lines
+            const items = input.split('\n').filter(item => item.trim() !== '');
+            
+            // Remove duplicates using Set
+            const uniqueItems = [...new Set(items)];
+            
+            // Update the input textarea with unique items
+            document.getElementById('inputList').value = uniqueItems.join('\n');
+            
+            // Show success message
+            showToast(`Removed ${items.length - uniqueItems.length} duplicate items`);
+        }
+    </script>
+</body>
+</html>
