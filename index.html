@@ -11,8 +11,6 @@
             --accent-color: #6b8cae;
             --text-color: #333;
             --border-color: #dde1e7;
-            --ad-bg-color: #f5f7fa;
-            --ad-border-color: #dde1e7;
         }
         
         body {
@@ -107,74 +105,8 @@
             font-size: 15px;
         }
         
-        /* Ad styles */
-        .ad-banner {
-            background-color: var(--ad-bg-color);
-            padding: 18px;
-            text-align: center;
-            margin-bottom: 30px;
-            border: 1px solid var(--ad-border-color);
-            border-radius: 8px;
-            min-height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #777;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-        }
-        
-        .ad-sidebar {
-            background-color: var(--ad-bg-color);
-            padding: 15px;
-            text-align: center;
-            border: 1px solid var(--ad-border-color);
-            border-radius: 8px;
-            width: 180px;
-            min-height: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #777;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-        }
-        
-        .ad-footer {
-            background-color: var(--ad-bg-color);
-            padding: 18px;
-            text-align: center;
-            margin-top: 30px;
-            border: 1px solid var(--ad-border-color);
-            border-radius: 8px;
-            min-height: 90px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #777;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-        }
-        
-        .page-wrapper {
-            display: flex;
-            gap: 30px;
-        }
-        
-        .main-content {
-            flex: 1;
-        }
-        
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
-            .page-wrapper {
-                flex-direction: column;
-            }
-            
-            .ad-sidebar {
-                width: auto;
-                min-height: 250px;
-                margin-top: 30px;
-            }
-            
             .container {
                 flex-direction: column;
             }
@@ -204,44 +136,29 @@
 </head>
 <body>
     <h1>List Formatter</h1>
-    
-    <!-- Top Banner Ad -->
-    <div class="ad-banner">
-        <p>Advertisement Banner (728×90)</p>
-    </div>
-    
-    <div class="page-wrapper">
-        <div class="main-content">
-            <div class="container">
-                <div class="input-section">
-                    <h2>Input</h2>
-                    <p>Enter your list (one item per line):</p>
-                    <textarea id="inputList" placeholder="1
+
+    <div class="container">
+        <div class="input-section">
+            <h2>Input</h2>
+            <p>Enter your list (one item per line):</p>
+            <textarea id="inputList" placeholder="1
 2
 3"></textarea>
-                    <div class="controls">
-                        <button onclick="formatList('comma')">Format with Commas</button>
-                        <button onclick="formatList('quotes')">Format with Quotes</button>
-                        <button onclick="removeDuplicates()">Remove Duplicates</button>
-                    </div>
-                </div>
-                <div class="output-section">
-                    <h2>Output</h2>
-                    <button onclick="copyToClipboard()" style="margin-bottom: 15px;">Copy to Clipboard</button>
-                    <div class="output" id="outputText"></div>
-                </div>
+            <div class="controls">
+                <button onclick="formatList('comma')">Format with Commas</button>
+                <button onclick="formatList('quotes')">Format with Quotes</button>
+                <button onclick="removeDuplicates()">Remove Duplicates</button>
             </div>
-            
-            <!-- Footer Ad -->
-            <div class="ad-footer">
-                <p>Advertisement Banner (728×90)</p>
+            <div class="controls">
+                <button onclick="stripProtocolAndWww()">Remove http(s):// and www.</button>
+                <button onclick="addHttps()">Add https://</button>
+                <button onclick="removePath()">Remove Path from URLs</button>
             </div>
         </div>
-        
-        <!-- Sidebar Ad -->
-        <div class="ad-sidebar">
-            <p>Advertisement</p>
-            <p>Sidebar (160×600)</p>
+        <div class="output-section">
+            <h2>Output</h2>
+            <button onclick="copyToClipboard()" style="margin-bottom: 15px;">Copy to Clipboard</button>
+            <div class="output" id="outputText"></div>
         </div>
     </div>
 
@@ -329,6 +246,61 @@
             
             // Show success message
             showToast(`Removed ${items.length - uniqueItems.length} duplicate items`);
+        }
+
+        function getInputItems() {
+            const input = document.getElementById('inputList').value;
+            return input.split('\n').filter(item => item.trim() !== '');
+        }
+
+        function applyToInput(transformFn, successMessage) {
+            const items = getInputItems();
+            const transformed = items.map(transformFn);
+
+            document.getElementById('inputList').value = transformed.join('\n');
+            showToast(successMessage);
+        }
+
+        function stripProtocolAndWww() {
+            // Removes a leading http:// or https://, then a leading www.
+            applyToInput(
+                item => item.trim()
+                    .replace(/^https?:\/\//i, '')
+                    .replace(/^www\./i, ''),
+                'Removed protocol and www. prefixes'
+            );
+        }
+
+        function addHttps() {
+            // Adds https:// to any entry that doesn't already have http:// or https://
+            applyToInput(
+                item => {
+                    const trimmed = item.trim();
+                    return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+                },
+                'Added https:// where missing'
+            );
+        }
+
+        function removePath() {
+            // Strips any path, query string, or hash, leaving just the protocol (if present) and host
+            applyToInput(
+                item => {
+                    const trimmed = item.trim();
+                    const hasProtocol = /^https?:\/\//i.test(trimmed);
+                    const urlStr = hasProtocol ? trimmed : `https://${trimmed}`;
+
+                    try {
+                        const url = new URL(urlStr);
+                        const host = url.port ? `${url.hostname}:${url.port}` : url.hostname;
+                        return hasProtocol ? `${url.protocol}//${host}` : host;
+                    } catch (e) {
+                        // Not a parseable URL, leave it unchanged
+                        return trimmed;
+                    }
+                },
+                'Removed paths from URLs'
+            );
         }
     </script>
 </body>

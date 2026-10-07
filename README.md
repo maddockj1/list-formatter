@@ -21,7 +21,7 @@ A simple web-based tool for formatting lists with various options.
 
 ## Live Demo
 
-Visit the live application at: [Your GitHub Pages URL will be here]
+Visit the live application at: [https://maddockj1.github.io/list-formatter/](https://maddockj1.github.io/list-formatter/)
 
 ## Technologies Used
 
